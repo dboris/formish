@@ -1,7 +1,7 @@
 ﻿namespace Formish
 
 open Xamarin.Forms
-open Elmish
+open Elmish.Core
 
 module SimpleCounter =
 

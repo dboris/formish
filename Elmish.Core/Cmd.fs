@@ -1,11 +1,11 @@
-﻿(**
+(**
 Cmd
 ---------
 Core abstractions for dispatching messages in Elmish.
 
 *)
 
-namespace Elmish
+namespace Elmish.Core
 
 open System
 

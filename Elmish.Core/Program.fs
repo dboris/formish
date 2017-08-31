@@ -5,7 +5,7 @@ Core abstractions for creating and running the dispatch loop.
 
 *)
 
-namespace Elmish
+namespace Elmish.Core
 
 open System
 
@@ -116,5 +116,6 @@ module Program =
 
     /// Start the dispatch loop with `unit` for the init() function.
     let run (program: Program<unit, 'model, 'msg, 'view>) = runWith () program
+
 
 
