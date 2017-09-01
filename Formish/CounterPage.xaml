@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             x:Class="Formish.CounterPage">
+	<ContentPage.Content>
+        <StackLayout VerticalOptions="Center">
+            <Label XAlign="Center" Text="{Binding Count}" />
+            <Button Text="Increment" Command="{Binding IncrementCommand}" />
+            <Button Text="Decrement" Command="{Binding DecrementCommand}" />
+        </StackLayout>
+	</ContentPage.Content>
+</ContentPage>

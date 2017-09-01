@@ -2,46 +2,13 @@
 
 open System
 open Xamarin.Forms
+open Elmish.Core
 
-type Msg = Increment | Decrement
-
-module SimpleCounterPage =
-
-    type PageViewModel (initialCount, dispatch) =
-        inherit ViewModelBase ()
-
-        let mutable count = initialCount
-        let incrementCommand = new Command<_> (fun _ -> dispatch Increment)
-        let decrementCommand = new Command<_> (fun _ -> dispatch Decrement)
-
-        member self.Count with get () = count
-            and set value =
-                if value <> count 
-                then count <- value; base.OnPropertyChanged "Count"
-
-        member __.IncrementCommand with get () = incrementCommand
-        member __.DecrementCommand with get () = decrementCommand
-
-    type Page () =
-        inherit ContentPage (Title = "Simple Counter")
-
-        let label = Label (XAlign = TextAlignment.Center)
-        let incButton = Button (Text = "Increment")
-        let decButton = Button (Text = "Decrement")
-        let stack = StackLayout (VerticalOptions = LayoutOptions.Center)
-        do
-            label.SetBinding (Label.TextProperty, "Count")
-            incButton.SetBinding (Button.CommandProperty, "IncrementCommand")
-            decButton.SetBinding (Button.CommandProperty, "DecrementCommand")
-            stack.Children.Add label
-            stack.Children.Add incButton
-            stack.Children.Add decButton
-            base.Content <- stack
 
 module SimpleCounter =
-    open Elmish.Core
 
     type Model = { x : int }
+    type Msg = Increment | Decrement
 
     let init () =
         { x = 0 }, Cmd.none
@@ -51,12 +18,28 @@ module SimpleCounter =
         | Increment -> { model with x = model.x + 1 }, Cmd.none
         | Decrement -> { model with x = model.x - 1 }, Cmd.none
 
+    type PageViewModel (initialCount, dispatch) =
+        inherit ViewModelBase ()
+
+        let mutable count = initialCount
+        let incrementCommand = new Command<_> (fun _ -> dispatch Increment)
+        let decrementCommand = new Command<_> (fun _ -> dispatch Decrement)
+
+        member self.Count 
+            with get () = count
+            and set value =
+                if value <> count 
+                then count <- value; base.OnPropertyChanged "Count"
+
+        member __.IncrementCommand with get () = incrementCommand
+        member __.DecrementCommand with get () = decrementCommand
+
     let mutable pageViewModel = None
-    let page = SimpleCounterPage.Page ()
+    let page = CounterPage ()
 
     let setupView initial =
         let sub dispatch =
-            let vm = SimpleCounterPage.PageViewModel (initial.x, dispatch)
+            let vm = PageViewModel (initial.x, dispatch)
             pageViewModel <- vm |> Some
             page.BindingContext <- vm
         Cmd.ofSub sub
