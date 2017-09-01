@@ -97,5 +97,4 @@ module Cmd =
             |> Async.AwaitTask 
             |> try Async.RunSynchronously with _ -> (ofError >> dispatch)
             |> (ofSuccess >> dispatch)
-            |> ignore
         [bind]
