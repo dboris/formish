@@ -4,14 +4,14 @@ open System
 open System.ComponentModel
 open Xamarin.Forms
 
+type Msg = Increment | Decrement
+
 module SimpleCounterPage =
-    let notSubscribed () = Diagnostics.Debug.WriteLine "Handler not subscribed"
 
-    type PageViewModel () =
-        let mutable count = 0
-        let mutable incrementCommand = new Command<_> (fun () -> notSubscribed ())
-        let mutable decrementCommand = new Command<_> (fun () -> notSubscribed ())
-
+    type PageViewModel (initialCount, dispatch) =
+        let mutable count = initialCount
+        let incrementCommand = new Command<_> (fun _ -> dispatch Increment)
+        let decrementCommand = new Command<_> (fun _ -> dispatch Decrement)
         let propertyChanged = new Event<PropertyChangedEventHandler, PropertyChangedEventArgs> ()
 
         interface INotifyPropertyChanged with
@@ -24,24 +24,10 @@ module SimpleCounterPage =
                     count <- value
                     propertyChanged.Trigger (self, new PropertyChangedEventArgs ("Count"))
 
-        member self.IncrementCommand 
-            with get () = incrementCommand
-            and set value =
-                incrementCommand <- value
-                propertyChanged.Trigger (self, new PropertyChangedEventArgs ("IncrementCommand"))
+        member __.IncrementCommand with get () = incrementCommand
+        member __.DecrementCommand with get () = decrementCommand
 
-        member self.DecrementCommand
-            with get () = decrementCommand
-            and set value =
-                decrementCommand <- value
-                propertyChanged.Trigger (self, new PropertyChangedEventArgs ("DecrementCommand"))
-
-        member self.Setup (initialCount, dispatch, incrementAction, decrementAction) =
-            self.Count <- initialCount
-            self.IncrementCommand <- new Command<_> (fun _ -> dispatch incrementAction)
-            self.DecrementCommand <- new Command<_> (fun _ -> dispatch decrementAction)
-
-    type Page (viewModel) as self =
+    type Page () =
         inherit ContentPage (Title = "Simple Counter")
 
         let label = Label (XAlign = TextAlignment.Center)
@@ -49,7 +35,6 @@ module SimpleCounterPage =
         let decButton = Button (Text = "Decrement")
         let stack = StackLayout (VerticalOptions = LayoutOptions.Center)
         do
-            self.BindingContext <- viewModel
             label.SetBinding (Label.TextProperty, "Count")
             incButton.SetBinding (Button.CommandProperty, "IncrementCommand")
             decButton.SetBinding (Button.CommandProperty, "DecrementCommand")
@@ -62,7 +47,6 @@ module SimpleCounter =
     open Elmish.Core
 
     type Model = { x : int }
-    type Msg = Increment | Decrement
 
     let init () =
         { x = 0 }, Cmd.none
@@ -72,18 +56,22 @@ module SimpleCounter =
         | Increment -> { model with x = model.x + 1 }, Cmd.none
         | Decrement -> { model with x = model.x - 1 }, Cmd.none
 
-    let pageViewModel = SimpleCounterPage.PageViewModel ()
-    let page = SimpleCounterPage.Page (pageViewModel)
-    let subscribeViewModel initial =
+    let mutable pageViewModel = None
+    let page = SimpleCounterPage.Page ()
+
+    let setupView initial =
         let sub dispatch =
-            pageViewModel.Setup (initial.x, dispatch, Increment, Decrement)
+            let vm = SimpleCounterPage.PageViewModel (initial.x, dispatch)
+            pageViewModel <- vm |> Some
+            page.BindingContext <- vm
         Cmd.ofSub sub
 
     let view model dispatch =
-        Device.BeginInvokeOnMainThread (fun () -> pageViewModel.Count <- model.x)
+        Device.BeginInvokeOnMainThread (fun () -> 
+            pageViewModel |> Option.iter (fun vm -> vm.Count <- model.x))
 
     let run () =
         Program.mkProgram init update view
-        |> Program.withSubscription subscribeViewModel
+        |> Program.withSubscription setupView
         |> Program.withConsoleTrace
         |> Program.run
