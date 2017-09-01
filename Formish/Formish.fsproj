@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure.fs" />
     <Compile Include="SimpleCounter.fs" />
     <Compile Include="Formish.fs" />
     <Compile Include="AssemblyInfo.fs" />

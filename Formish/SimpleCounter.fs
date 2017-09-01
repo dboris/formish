@@ -1,7 +1,6 @@
 ﻿namespace Formish
 
 open System
-open System.ComponentModel
 open Xamarin.Forms
 
 type Msg = Increment | Decrement
@@ -9,20 +8,16 @@ type Msg = Increment | Decrement
 module SimpleCounterPage =
 
     type PageViewModel (initialCount, dispatch) =
+        inherit ViewModelBase ()
+
         let mutable count = initialCount
         let incrementCommand = new Command<_> (fun _ -> dispatch Increment)
         let decrementCommand = new Command<_> (fun _ -> dispatch Decrement)
-        let propertyChanged = new Event<PropertyChangedEventHandler, PropertyChangedEventArgs> ()
 
-        interface INotifyPropertyChanged with
-            [<CLIEvent>] member __.PropertyChanged = propertyChanged.Publish
-
-        member self.Count
-            with get () = count
+        member self.Count with get () = count
             and set value =
-                if value <> count then
-                    count <- value
-                    propertyChanged.Trigger (self, new PropertyChangedEventArgs ("Count"))
+                if value <> count 
+                then count <- value; base.OnPropertyChanged "Count"
 
         member __.IncrementCommand with get () = incrementCommand
         member __.DecrementCommand with get () = decrementCommand
