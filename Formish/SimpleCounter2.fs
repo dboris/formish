@@ -36,13 +36,20 @@ module SimpleCounter2 =
 
     let page = CounterPage ()
 
-    let withRootViewModel vmType (program : Program<_,_,_,_>) =
-        let mutable pageViewModel = None
+    let mkViewModel viewModelType initial dispatch =
+        viewModelType (initial, dispatch)
+
+    let bindPageContext (page : Page) viewModel =
+        page.BindingContext <- viewModel
+        viewModel
+
+    let withRootViewModel mkRootVM (program : Program<_,_,_,_>) =
+        let mutable rootViewModel = None
         let setState m d =
-            match pageViewModel with
+            match rootViewModel with
             | None ->
-                let vm = vmType (m, d)
-                pageViewModel <- vm |> Some
+                let vm = mkRootVM m d
+                rootViewModel <- vm |> Some
                 page.BindingContext <- vm
                 Device.BeginInvokeOnMainThread (fun () -> program.view m d vm)
             | Some vm ->
@@ -54,6 +61,6 @@ module SimpleCounter2 =
 
     let run () =
         Program.mkProgram init update view
-        |> withRootViewModel PageViewModel
+        |> withRootViewModel (mkViewModel PageViewModel >> bindPageContext page)
         |> Program.withConsoleTrace
         |> Program.run
