@@ -6,5 +6,5 @@ open Xamarin.Forms
 type App () = 
     inherit Application ()
     do 
-        base.MainPage <- SimpleCounter.page
-        SimpleCounter.run ()
+        base.MainPage <- SimpleCounter2.page
+        SimpleCounter2.run ()

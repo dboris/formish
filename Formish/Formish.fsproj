@@ -57,6 +57,7 @@
       <DependentUpon>CounterPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="SimpleCounter.fs" />
+    <Compile Include="SimpleCounter2.fs" />
     <Compile Include="Formish.fs" />
     <Compile Include="AssemblyInfo.fs" />
     <None Include="packages.config" />
